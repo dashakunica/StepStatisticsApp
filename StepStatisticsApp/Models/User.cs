@@ -18,6 +18,8 @@ namespace StepStatisticsApp.Models
 
         public int WorstStepResult { get; set; }
 
+        public List<int> StepStatistics { get; set; }
+
         public static int CalculateAvarageStep(List<int> steps)
         {
             int summ = 0;

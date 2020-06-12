@@ -6,6 +6,9 @@ using StepStatisticsApp.Models;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using LiveCharts;
+using LiveCharts.Wpf;
+using LiveCharts.Defaults;
 
 namespace StepStatisticsApp
 {
@@ -13,13 +16,16 @@ namespace StepStatisticsApp
     {
         public ObservableCollection<User> UserList { get; set; }
 
-        public ICommand ClickUserNameCommand { get; set; }
+        public ICommand ClickUserCommand { get; set; }
 
-        public string SelectedUserName { get; set; }
+        //public List<int> SelectedUser { get; set; }
+
+        public ObservableCollection<KeyValuePair<int, int>> Data { get; set; } = new ObservableCollection<KeyValuePair<int, int>>();
 
         public UsersViewModel()
         {
-            ClickUserNameCommand = new RelayCommand<User>(SelectedUserDetails);
+            Data.Add(new KeyValuePair<int, int>(1, 1));
+            ClickUserCommand = new RelayCommand<User>(SelectedUserDetails);
             UserList = new ObservableCollection<User>();
             var allData = Startup.UsersStepPair;
             foreach (var userData in allData)
@@ -34,6 +40,7 @@ namespace StepStatisticsApp
                     AvarageStepPerMonth = avSteps,
                     BestStepResult = minSteps,
                     WorstStepResult = maxSteps,
+                    StepStatistics = userData.Value,
                 };
 
                 UserList.Add(user);
@@ -44,9 +51,13 @@ namespace StepStatisticsApp
         {
             if (obj != null)
             {
-                this.SelectedUserName = obj.Name;
-                // better to go for full property instead of calling property change here 
-                this.RaisePropertyChanged("SelectedUserName");
+                Data.Clear();
+                for (int i = 1; i < obj.StepStatistics.Count; i++)
+                {
+                    Data.Add(new KeyValuePair<int, int>(obj.StepStatistics[i - 1], i));
+                }
+
+                this.RaisePropertyChanged(nameof(Data));
             }
         }
     }

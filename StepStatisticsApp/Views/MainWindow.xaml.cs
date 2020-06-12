@@ -18,16 +18,16 @@ namespace StepStatisticsApp
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+    //public partial class MainWindow : Window
+    //{
+    //    public MainWindow()
+    //    {
+    //        InitializeComponent();
+    //    }
 
-        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
+    //    private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    //    {
 
-        }
-    }
+    //    }
+    //}
 }

@@ -2,13 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace StepStatisticsApp.Views
+namespace StepStatisticsApp
 {
-    class MainWindow
-    {
-        public MainWindow()
-        {
-            
-        }
-    }
+
 }
