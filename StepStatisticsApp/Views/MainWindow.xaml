@@ -5,8 +5,43 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StepStatisticsApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid Margin="-30,-45,0,0">
+        Title="MainWindow" Height="800" Width="1200">
+    <Window.DataContext>
+        <local:UsersViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <Grid Grid.Column="0">
+            <DockPanel>
+                <ListView x:Name="listViewUsers" ItemsSource="{Binding UserList}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Header="Avarage step per month" DisplayMemberBinding="{Binding AvarageStepPerMonth}" />
+                            <GridViewColumn Header="Best step result" DisplayMemberBinding="{Binding BestStepResult}" />
+                            <GridViewColumn Header="Worst step result" DisplayMemberBinding="{Binding WorstStepResult}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <StackPanel>
+                <Button Content="Show Selected Student"
+                Command="{Binding ClickUserNameCommand}"
+                CommandParameter="{Binding ElementName=listViewUsers, Path=SelectedItem}" />
+                <Border>
+                    <TextBlock FontWeight="Bold" Text="Selected User: ">
+                <Run Text="{Binding SelectedUserName, Mode=TwoWay}" />
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+        </Grid>
     </Grid>
+    
 </Window>

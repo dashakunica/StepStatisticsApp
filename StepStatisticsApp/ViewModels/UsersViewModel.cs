@@ -1,94 +1,52 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using StepStatisticsApp.Models;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
-namespace StepStatisticsApp.ViewModels
+namespace StepStatisticsApp
 {
-    public class UsersViewModel
+    public class UsersViewModel : ViewModelBase
     {
-        private static readonly IEnumerable<String> TestDataFileNames = new ReadOnlyCollection<string>
-        (new List<String>
-        {
-            @"day1.json",
-            @"day2.json",
-            @"day3.json",
-            @"day4.json",
-            @"day5.json",
-            @"day6.json",
-            @"day7.json",
-            @"day8.json",
-            @"day9.json",
-            @"day10.json",
-            @"day11.json",
-            @"day12.json",
-            @"day13.json",
-            @"day14.json",
-            @"day15.json",
-            @"day16.json",
-            @"day17.json",
-            @"day19.json",
-            @"day20.json",
-            @"day21.json",
-            @"day22.json",
-            @"day23.json",
-            @"day24.json",
-            @"day25.json",
-            @"day26.json",
-            @"day27.json",
-            @"day28.json",
-            @"day29.json",
-            @"day30.json",
-        });
+        public ObservableCollection<User> UserList { get; set; }
 
-        private static readonly string DefaultRootDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestData");
+        public ICommand ClickUserNameCommand { get; set; }
 
-        public static Dictionary<string, List<int>> UsersStepPair { get; private set; } = new Dictionary<string, List<int>>();
+        public string SelectedUserName { get; set; }
 
         public UsersViewModel()
         {
-            ReadJson();
-        }
-
-        private static void ReadJson()
-        {
-            foreach (var fileName in TestDataFileNames)
+            ClickUserNameCommand = new RelayCommand<User>(SelectedUserDetails);
+            UserList = new ObservableCollection<User>();
+            var allData = Startup.UsersStepPair;
+            foreach (var userData in allData)
             {
-                Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
-                JsonModel o;
-                using (FileStream s = File.Open(Path.Combine(DefaultRootDirectory, fileName), FileMode.Open))
-                using (StreamReader sr = new StreamReader(s))
-                using (JsonReader reader = new JsonTextReader(sr))
+                int avSteps = User.CalculateAvarageStep(userData.Value);
+                int minSteps = User.FindBestResult(userData.Value);
+                int maxSteps = User.FindWorstResult(userData.Value);
+
+                var user = new User()
                 {
-                    while (reader.Read())
-                    {
-                        if (reader.TokenType == JsonToken.StartObject)
-                        {
-                            o = serializer.Deserialize<JsonModel>(reader);
-                            Add(o.User, o.Steps);
-                        }
-                    }
-                }
+                    Name = userData.Key,
+                    AvarageStepPerMonth = avSteps,
+                    BestStepResult = minSteps,
+                    WorstStepResult = maxSteps,
+                };
+
+                UserList.Add(user);
             }
         }
 
-        public static void Add(string key, int value)
+        private void SelectedUserDetails(User obj)
         {
-            if (UsersStepPair.ContainsKey(key))
+            if (obj != null)
             {
-                List<int> list = UsersStepPair[key];
-                if (list.Contains(value) == false)
-                {
-                    list.Add(value);
-                }
-            }
-            else
-            {
-                List<int> list = new List<int>();
-                list.Add(value);
-                UsersStepPair.Add(key, list);
+                this.SelectedUserName = obj.Name;
+                // better to go for full property instead of calling property change here 
+                this.RaisePropertyChanged("SelectedUserName");
             }
         }
     }

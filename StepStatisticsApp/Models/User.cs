@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace StepStatisticsApp.Models
 {
-    public class User : INotifyPropertyChanged
+    public class User
     {
         public string Name { get; set; }
 
@@ -18,7 +18,25 @@ namespace StepStatisticsApp.Models
 
         public int WorstStepResult { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public static int CalculateAvarageStep(List<int> steps)
+        {
+            int summ = 0;
+            foreach (var step in steps)
+            {
+                summ += step;
+            }
 
+            return summ / steps.Count;
+        }
+
+        public static int FindBestResult(List<int> steps)
+        {
+            return steps.Max();
+        }
+
+        public static int FindWorstResult(List<int> steps)
+        {
+            return steps.Min();
+        }
     }
 }
