@@ -6,9 +6,6 @@ using StepStatisticsApp.Models;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using LiveCharts;
-using LiveCharts.Wpf;
-using LiveCharts.Defaults;
 
 namespace StepStatisticsApp
 {
@@ -16,20 +13,28 @@ namespace StepStatisticsApp
     {
         public ObservableCollection<User> UserList { get; set; }
 
-        public ICommand ClickUserCommand { get; set; }
+        public ICommand ClickChartCommand { get; set; }
 
-        //public List<int> SelectedUser { get; set; }
+        public ICommand ClickExportCommand { get; set; }
 
         public ObservableCollection<KeyValuePair<int, int>> Data { get; set; } = new ObservableCollection<KeyValuePair<int, int>>();
 
         public UsersViewModel()
         {
-            Data.Add(new KeyValuePair<int, int>(1, 1));
-            ClickUserCommand = new RelayCommand<User>(SelectedUserDetails);
+            ClickChartCommand = new RelayCommand<User>(SelectedUserDetails);
+            ClickExportCommand = new RelayCommand<User>(ExportTo);
+
             UserList = new ObservableCollection<User>();
-            var allData = Startup.UsersStepPair;
-            foreach (var userData in allData)
+
+            var stepData = Startup.UsersStepPair;
+            var rankData = Startup.UsersRankPair;
+            var statusData = Startup.UsersStatusPair;
+
+            foreach (var userData in stepData)
             {
+                var rankDict = rankData[userData.Key];
+                var statusDict = statusData[userData.Key];
+
                 int avSteps = User.CalculateAvarageStep(userData.Value);
                 int minSteps = User.FindBestResult(userData.Value);
                 int maxSteps = User.FindWorstResult(userData.Value);
@@ -41,6 +46,8 @@ namespace StepStatisticsApp
                     BestStepResult = minSteps,
                     WorstStepResult = maxSteps,
                     StepStatistics = userData.Value,
+                    RankStatistics = rankDict,
+                    StatusStatistics = statusDict,
                 };
 
                 UserList.Add(user);
@@ -52,13 +59,37 @@ namespace StepStatisticsApp
             if (obj != null)
             {
                 Data.Clear();
-                for (int i = 1; i < obj.StepStatistics.Count; i++)
+                foreach (var item in obj.StepStatistics)
                 {
-                    Data.Add(new KeyValuePair<int, int>(obj.StepStatistics[i - 1], i));
+                    Data.Add(new KeyValuePair<int, int>(item.Value, item.Key));
                 }
 
                 this.RaisePropertyChanged(nameof(Data));
             }
+        }
+
+        private void ExportTo(User obj)
+        {
+            string xmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data.xml");
+
+            FileStream filestream = default;
+            try
+            {
+                filestream = File.Create(xmlPath);
+            }
+            catch (FileNotFoundException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+            catch (DirectoryNotFoundException)
+            {
+            }
+
+            using var stream = new StreamWriter(filestream);
+            using var writer = new XMLWriter(stream);
+            writer.Write(obj);
         }
     }
 }

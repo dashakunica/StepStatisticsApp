@@ -6,7 +6,6 @@
         xmlns:cht="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:DV="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:DVC="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit" 
-        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
         xmlns:local="clr-namespace:StepStatisticsApp"
         mc:Ignorable="d"
@@ -38,7 +37,10 @@
         <Grid Grid.Column="1">
             <StackPanel>
                 <Button Content="Show statistic about selected user."
-                Command="{Binding ClickUserCommand}"
+                Command="{Binding ClickChartCommand}"
+                CommandParameter="{Binding SelectedItem, ElementName=listViewUsers}" Height="55" />
+                <Button Content="Export info about selected user into XML."
+                Command="{Binding ClickExportCommand}"
                 CommandParameter="{Binding SelectedItem, ElementName=listViewUsers}" Height="55" />
                 <Border Height="418">
 
@@ -55,8 +57,6 @@
                     </DVC:Chart>
                 </Border>
             </StackPanel>
-
         </Grid>
     </Grid>
-
 </Window>

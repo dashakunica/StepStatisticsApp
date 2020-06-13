@@ -18,27 +18,31 @@ namespace StepStatisticsApp.Models
 
         public int WorstStepResult { get; set; }
 
-        public List<int> StepStatistics { get; set; }
+        public Dictionary<int, int> StepStatistics { get; set; }
 
-        public static int CalculateAvarageStep(List<int> steps)
+        public Dictionary<int, int> RankStatistics { get; set; }
+
+        public Dictionary<int, string> StatusStatistics { get; set; }
+
+        public static int CalculateAvarageStep(Dictionary<int, int> steps)
         {
             int summ = 0;
             foreach (var step in steps)
             {
-                summ += step;
+                summ += step.Value;
             }
 
             return summ / steps.Count;
         }
 
-        public static int FindBestResult(List<int> steps)
+        public static int FindBestResult(Dictionary<int, int> steps)
         {
-            return steps.Max();
+            return steps.Values.Max();
         }
 
-        public static int FindWorstResult(List<int> steps)
+        public static int FindWorstResult(Dictionary<int, int> steps)
         {
-            return steps.Min();
+            return steps.Values.Min();
         }
     }
 }
