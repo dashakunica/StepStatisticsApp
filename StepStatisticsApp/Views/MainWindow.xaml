@@ -8,6 +8,7 @@
         xmlns:DVC="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit" 
         xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
         xmlns:local="clr-namespace:StepStatisticsApp"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1200">
     <Window.DataContext>
@@ -18,10 +19,27 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-
         <Grid Grid.Column="0">
-            <DockPanel>
-                <ListView x:Name="listViewUsers" ItemsSource="{Binding UserList}">
+
+            <ListView x:Name="listViewUsers" 
+                          ItemsSource="{Binding UserList}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                        <i:InvokeCommandAction 
+                            Command="{Binding ClickChartCommand}"                   
+                            CommandParameter="{Binding SelectedItem, ElementName=listViewUsers}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+                <ListView.Resources>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsUnstableUser}" Value="True">
+                                    <Setter Property="Background" Value="LightBlue"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                </ListView.Resources>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
@@ -31,17 +49,11 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-            </DockPanel>
+            
         </Grid>
 
         <Grid Grid.Column="1">
             <StackPanel>
-                <Button Content="Show statistic about selected user."
-                Command="{Binding ClickChartCommand}"
-                CommandParameter="{Binding SelectedItem, ElementName=listViewUsers}" Height="55" />
-                <Button Content="Export info about selected user into XML."
-                Command="{Binding ClickExportCommand}"
-                CommandParameter="{Binding SelectedItem, ElementName=listViewUsers}" Height="55" />
                 <Border Height="418">
 
                     <DVC:Chart Canvas.Top="80" Canvas.Left="10" x:Name="mcChart" Background="LightSteelBlue" Margin="12"
@@ -51,10 +63,18 @@
 
                                 ItemsSource="{Binding Data}"
 
-                                IndependentValueBinding="{Binding Value}"
+                                IndependentValueBinding="{Binding Key}"
 
-                                DependentValueBinding="{Binding Key}"/>
+                                DependentValueBinding="{Binding Value}"/>
                     </DVC:Chart>
+                </Border>
+                <Button Content="Export info about selected user into XML."
+                Command="{Binding ClickExportCommand}"
+                CommandParameter="{Binding SelectedItem, ElementName=listViewUsers}" Height="55" />
+                <Border>
+                    <TextBlock FontWeight="Bold" Text="Successfully exported user to a file: ">
+                    <Run Text="{Binding ExportedUserNames, Mode=TwoWay}" />
+                    </TextBlock>
                 </Border>
             </StackPanel>
         </Grid>

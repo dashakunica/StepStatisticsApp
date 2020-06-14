@@ -24,6 +24,8 @@ namespace StepStatisticsApp.Models
 
         public Dictionary<int, string> StatusStatistics { get; set; }
 
+        public bool IsUnstableUser { get; set; }
+
         public static int CalculateAvarageStep(Dictionary<int, int> steps)
         {
             int summ = 0;
@@ -43,6 +45,12 @@ namespace StepStatisticsApp.Models
         public static int FindWorstResult(Dictionary<int, int> steps)
         {
             return steps.Values.Min();
+        }
+
+        public static bool IsStabStepUser(int avarageStepPerMonth, int bestStepResult)
+        {
+            double percent = ((double)avarageStepPerMonth / (double)bestStepResult);
+            return (1 - percent) > 0.2;
         }
     }
 }

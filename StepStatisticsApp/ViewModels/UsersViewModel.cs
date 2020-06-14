@@ -3,16 +3,23 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using StepStatisticsApp.Models;
-using System.ComponentModel;
+using System.Text;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using System.Globalization;
+using System.Windows;
 
 namespace StepStatisticsApp
 {
+
     public class UsersViewModel : ViewModelBase
     {
+        string XmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data.xml");
+
         public ObservableCollection<User> UserList { get; set; }
 
+        public String ExportedUserNames { get; set; } 
+        
         public ICommand ClickChartCommand { get; set; }
 
         public ICommand ClickExportCommand { get; set; }
@@ -21,6 +28,11 @@ namespace StepStatisticsApp
 
         public UsersViewModel()
         {
+            if (File.Exists(XmlPath))
+            {
+                File.Delete(XmlPath);
+            }
+
             ClickChartCommand = new RelayCommand<User>(SelectedUserDetails);
             ClickExportCommand = new RelayCommand<User>(ExportTo);
 
@@ -36,18 +48,20 @@ namespace StepStatisticsApp
                 var statusDict = statusData[userData.Key];
 
                 int avSteps = User.CalculateAvarageStep(userData.Value);
-                int minSteps = User.FindBestResult(userData.Value);
-                int maxSteps = User.FindWorstResult(userData.Value);
+                int maxSteps = User.FindBestResult(userData.Value);
+                int minSteps = User.FindWorstResult(userData.Value);
+                bool isStable = User.IsStabStepUser(avSteps, maxSteps);
 
                 var user = new User()
                 {
                     Name = userData.Key,
                     AvarageStepPerMonth = avSteps,
-                    BestStepResult = minSteps,
-                    WorstStepResult = maxSteps,
+                    BestStepResult = maxSteps,
+                    WorstStepResult = minSteps,
                     StepStatistics = userData.Value,
                     RankStatistics = rankDict,
                     StatusStatistics = statusDict,
+                    IsUnstableUser = isStable,
                 };
 
                 UserList.Add(user);
@@ -61,7 +75,7 @@ namespace StepStatisticsApp
                 Data.Clear();
                 foreach (var item in obj.StepStatistics)
                 {
-                    Data.Add(new KeyValuePair<int, int>(item.Value, item.Key));
+                    Data.Add(new KeyValuePair<int, int>(item.Key, item.Value));
                 }
 
                 this.RaisePropertyChanged(nameof(Data));
@@ -70,12 +84,10 @@ namespace StepStatisticsApp
 
         private void ExportTo(User obj)
         {
-            string xmlPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data.xml");
-
             FileStream filestream = default;
             try
             {
-                filestream = File.Create(xmlPath);
+                filestream = File.Open(XmlPath, FileMode.OpenOrCreate);
             }
             catch (FileNotFoundException)
             {
@@ -88,8 +100,11 @@ namespace StepStatisticsApp
             }
 
             using var stream = new StreamWriter(filestream);
-            using var writer = new XMLWriter(stream);
+            using var writer = new XMLUserWriter(stream);
             writer.Write(obj);
+            ExportedUserNames = obj.Name.ToString(CultureInfo.CurrentCulture);
+            this.RaisePropertyChanged("ExportedUserNames");
+            MessageBox.Show($"User {obj.Name} successfuly export into {XmlPath} path.");
         }
     }
 }

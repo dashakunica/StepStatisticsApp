@@ -8,42 +8,45 @@ using StepStatisticsApp.Models;
 
 namespace StepStatisticsApp
 {
-    public class XMLWriter : IDisposable
+    public class XMLUserWriter : IDisposable
     {
-        private readonly XmlWriter xmlTextWriter;
+        private readonly XmlTextWriter xmlTextWriter;
         private bool disposed = false;
 
-        public XMLWriter(StreamWriter writer)
+        public XMLUserWriter(StreamWriter writer)
         {
+            XmlWriterSettings xmlWriterSettings = new XmlWriterSettings()
+            {
+                Indent = true,
+                IndentChars = "\t",
+                NewLineOnAttributes = true
+            };
+
             this.xmlTextWriter = new XmlTextWriter(writer ?? throw new ArgumentNullException(nameof(writer)));
+            this.xmlTextWriter.Formatting = Formatting.Indented;
             this.xmlTextWriter.WriteStartDocument();
             this.xmlTextWriter.WriteStartElement("Users");
         }
 
         public void Write(User user)
         {
-            if (user is null)
+            if (user != null)
             {
-                throw new ArgumentNullException($"{nameof(user)} cannot be null.");
-            }
-
-            this.xmlTextWriter.WriteStartElement("User");
-            this.xmlTextWriter.WriteAttributeString("Name", user.Name.ToString(CultureInfo.InvariantCulture));
-            foreach (var step in user.StepStatistics)
-            {
-                foreach (var rank in user.RankStatistics)
+                this.xmlTextWriter.WriteStartElement("User");
+                this.xmlTextWriter.WriteAttributeString("Name", user.Name.ToString(CultureInfo.InvariantCulture));
+                foreach (var step in user.StepStatistics)
                 {
-                    foreach (var status in user.StatusStatistics)
-                    {
-                        this.xmlTextWriter.WriteStartElement("day", rank.Key.ToString(CultureInfo.InvariantCulture));
-                        this.xmlTextWriter.WriteAttributeString("steps", step.Value.ToString(CultureInfo.InvariantCulture));
-                        this.xmlTextWriter.WriteAttributeString("rank", rank.Value.ToString(CultureInfo.InvariantCulture));
-                        this.xmlTextWriter.WriteAttributeString("status", status.Value.ToString(CultureInfo.InvariantCulture));
-                        this.xmlTextWriter.WriteEndElement();
-                    }
+                    var rank = user.RankStatistics[step.Key];
+                    var status = user.StatusStatistics[step.Key];
+
+                    this.xmlTextWriter.WriteStartElement("day" + step.Key.ToString(CultureInfo.InvariantCulture));
+                    this.xmlTextWriter.WriteAttributeString("steps", step.Value.ToString(CultureInfo.InvariantCulture));
+                    this.xmlTextWriter.WriteAttributeString("rank", rank.ToString(CultureInfo.InvariantCulture));
+                    this.xmlTextWriter.WriteAttributeString("status", status.ToString(CultureInfo.InvariantCulture));
+                    this.xmlTextWriter.WriteEndElement();
                 }
+                this.xmlTextWriter.WriteEndElement();
             }
-            this.xmlTextWriter.WriteEndElement();
         }
 
         public void Dispose()
